@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Неделя 1: WORKSPACE — G-Konf Vibe Coding 2</title>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F5F3EB;
+            color: #2C2C2C;
+            line-height: 1.6;
+            padding: 60px 40px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Merriweather', Georgia, serif;
+            font-weight: 700;
+        }
+
+        h1 {
+            font-size: 2.4rem;
+            text-align: center;
+            margin-bottom: 8px;
+            color: #1a365d;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 1.1rem;
+            color: #555;
+            margin-bottom: 16px;
+        }
+
+        .dates {
+            text-align: center;
+            font-size: 0.95rem;
+            color: #1a365d;
+            font-weight: 600;
+            margin-bottom: 48px;
+        }
+
+        .goal-card {
+            background: #1a365d;
+            color: #FAF7F2;
+            border-radius: 12px;
+            padding: 32px 40px;
+            margin-bottom: 48px;
+            text-align: center;
+        }
+
+        .goal-card h2 {
+            color: #FAF7F2;
+            font-size: 1.3rem;
+            margin-bottom: 16px;
+            border: none;
+        }
+
+        .goal-card .goal-list {
+            text-align: left;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .goal-card .goal-list p {
+            margin: 8px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .goal-card .goal-list p::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #0891b2;
+        }
+
+        .goal-card .felt-sense {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            font-family: 'Merriweather', Georgia, serif;
+            font-style: italic;
+            font-size: 1.1rem;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin: 48px 0 24px 0;
+            color: #1a365d;
+            border-bottom: 2px solid #1a365d;
+            padding-bottom: 8px;
+        }
+
+        .quote {
+            font-family: 'Merriweather', Georgia, serif;
+            font-style: italic;
+            font-size: 1.15rem;
+            color: #333;
+            border-left: 4px solid #1a365d;
+            padding-left: 20px;
+            margin: 32px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 24px 0;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: #1a365d;
+            color: #FAF7F2;
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 500;
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(26, 54, 93, 0.2);
+            background: #FAF7F2;
+        }
+
+        tr:hover td {
+            background: #f0ede4;
+        }
+
+        .day-badge {
+            background: #1a365d;
+            color: #FAF7F2;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 24px 0;
+        }
+
+        .day-card {
+            background: #FAF7F2;
+            border: 1px solid #1a365d;
+            border-radius: 8px;
+            padding: 20px;
+            position: relative;
+        }
+
+        .day-card .day-number {
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: #1a365d;
+            color: #FAF7F2;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .day-card h3 {
+            font-size: 0.95rem;
+            color: #1a365d;
+            margin: 12px 0 8px 0;
+        }
+
+        .day-card p {
+            font-size: 0.85rem;
+            color: #555;
+        }
+
+        .day-card .tool-tag {
+            display: inline-block;
+            background: #0891b2;
+            color: #FAF7F2;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            margin-top: 10px;
+        }
+
+        .quest-section {
+            background: #FAF7F2;
+            border: 1px solid #1a365d;
+            border-radius: 8px;
+            padding: 24px 32px;
+            margin: 24px 0;
+        }
+
+        .quest-section h3 {
+            font-size: 1.1rem;
+            color: #1a365d;
+            margin-bottom: 16px;
+        }
+
+        .quest-list {
+            list-style: none;
+        }
+
+        .quest-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(26, 54, 93, 0.1);
+            display: flex;
+            gap: 12px;
+        }
+
+        .quest-list li:last-child {
+            border-bottom: none;
+        }
+
+        .quest-list .quest-day {
+            background: #1a365d;
+            color: #FAF7F2;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+
+        .quest-list .quest-text {
+            font-family: 'Merriweather', Georgia, serif;
+            font-style: italic;
+            font-size: 0.95rem;
+            color: #333;
+        }
+
+        .split-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin: 24px 0;
+        }
+
+        .split-section > div {
+            background: #FAF7F2;
+            border: 1px solid #1a365d;
+            border-radius: 8px;
+            padding: 24px;
+        }
+
+        .split-section h3 {
+            font-size: 1rem;
+            color: #1a365d;
+            margin-bottom: 16px;
+        }
+
+        .split-section ul {
+            list-style: none;
+        }
+
+        .split-section li {
+            padding: 8px 0;
+            padding-left: 20px;
+            position: relative;
+            font-size: 0.95rem;
+        }
+
+        .split-section li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #0891b2;
+        }
+
+        .minimum-card {
+            background: linear-gradient(135deg, #1a365d 0%, #234876 100%);
+            color: #FAF7F2;
+            border-radius: 12px;
+            padding: 32px;
+            margin-top: 48px;
+        }
+
+        .minimum-card h2 {
+            color: #FAF7F2;
+            border-bottom-color: rgba(255,255,255,0.3);
+            margin-top: 0;
+        }
+
+        .minimum-list {
+            list-style: none;
+            counter-reset: minimum;
+        }
+
+        .minimum-list li {
+            counter-increment: minimum;
+            padding: 16px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .minimum-list li:last-child {
+            border-bottom: none;
+        }
+
+        .minimum-list li::before {
+            content: counter(minimum);
+            background: #0891b2;
+            color: #FAF7F2;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+
+        .minimum-list li strong {
+            color: #0891b2;
+        }
+
+        .builder-note {
+            background: rgba(8, 145, 178, 0.1);
+            border: 1px dashed #0891b2;
+            border-radius: 8px;
+            padding: 20px 24px;
+            margin: 24px 0;
+            font-size: 0.95rem;
+        }
+
+        .builder-note strong {
+            color: #0891b2;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 32px 20px;
+            }
+            h1 {
+                font-size: 1.8rem;
+            }
+            .split-section {
+                grid-template-columns: 1fr;
+            }
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Неделя 1: WORKSPACE</h1>
+    <p class="subtitle">Знакомство с Cursor как рабочей средой</p>
+    <p class="dates">19-25 января 2026</p>
+
+    <div class="goal-card">
+        <h2>Цель недели</h2>
+        <div class="goal-list">
+            <p>Понять какие есть кнопочки и как устроен интерфейс</p>
+            <p>Получить первый опыт тыкания — создание файлов, общение с агентом</p>
+            <p>Перестать бояться и начать чувствовать себя комфортно</p>
+        </div>
+        <p class="felt-sense">Это неделя про felt sense — не про результат, а про ощущение от инструмента</p>
+    </div>
+
+    <h2>Звонки</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>День</th>
+                <th>Время</th>
+                <th>Формат</th>
+                <th>Что происходит</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><span class="day-badge">ПН</span></td>
+                <td>11:00 мск</td>
+                <td>60 мин</td>
+                <td>Старт недели с Лёшей + Димой. План, инструменты, Q&A</td>
+            </tr>
+            <tr>
+                <td><span class="day-badge">ВТ</span></td>
+                <td>11:00 мск</td>
+                <td>60 мин</td>
+                <td>Нетворк-сессия с Леной. Обсуждение, практики, работа в группах</td>
+            </tr>
+            <tr>
+                <td><span class="day-badge">СР</span></td>
+                <td>12:00 мск</td>
+                <td>30 мин</td>
+                <td>Q&A для РФ/РБ. Разбор вопросов</td>
+            </tr>
+            <tr>
+                <td><span class="day-badge">ЧТ</span></td>
+                <td>11:00 мск</td>
+                <td>60 мин</td>
+                <td>Q&A с Лёшей и Димой. Разбор кейсов и техпроблем</td>
+            </tr>
+            <tr>
+                <td><span class="day-badge">ПТ</span></td>
+                <td>11:00 мск</td>
+                <td>60 мин</td>
+                <td>Протагонист / Secret guest с живым кейсом</td>
+            </tr>
+            <tr>
+                <td><span class="day-badge">СБ</span></td>
+                <td>12:30 мск</td>
+                <td>2 часа</td>
+                <td>Стрим с Лёшей — углублённая практика</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>Трек PLAY AROUND: задания по дням</h2>
+    <div class="cards-grid">
+        <div class="day-card">
+            <div class="day-number">1</div>
+            <h3>Знакомство с Cursor</h3>
+            <p>Установленный Cursor, 10 вопросов агенту, первый файл</p>
+            <span class="tool-tag">cursor</span>
+        </div>
+        <div class="day-card">
+            <div class="day-number">2</div>
+            <h3>Cursor + Telegram</h3>
+            <p>Доступ к своим чатам через Telethon, поиск и анализ сообщений</p>
+            <span class="tool-tag">telethon</span>
+        </div>
+        <div class="day-card">
+            <div class="day-number">3</div>
+            <h3>Cursor + GitHub</h3>
+            <p>Связка с репозиторием, весь контекст про поток в курсоре</p>
+            <span class="tool-tag">github</span>
+        </div>
+        <div class="day-card">
+            <div class="day-number">4</div>
+            <h3>Cursor + YouTube</h3>
+            <p>MCP для YouTube, выжимка из подкаста под твой запрос</p>
+            <span class="tool-tag">mcp</span>
+        </div>
+        <div class="day-card">
+            <div class="day-number">5</div>
+            <h3>Cursor + Todoist</h3>
+            <p>Работающая связка через MCP, управление тасками из курсора</p>
+            <span class="tool-tag">mcp</span>
+        </div>
+    </div>
+
+    <p class="quote">В конце каждого дня: микро-квест с GPT-коучем — трансформационное задание, которое поможет интегрировать вайб-кодинг в жизнь</p>
+
+    <div class="builder-note">
+        <strong>Трек BUILDER</strong> откроется со второй недели. Если хочешь за поток собрать свой проект с нуля — на этой неделе просто осваивай Cursor. Со следующей недели начнём discovery: brainstorm идей, фильтрация, планирование.
+    </div>
+
+    <h2>Микро-квесты: вопросы для размышления</h2>
+    <div class="quest-section">
+        <ul class="quest-list">
+            <li>
+                <span class="quest-day">1</span>
+                <span class="quest-text">Что сегодня больше всего удивило/вдохновило в Cursor?</span>
+            </li>
+            <li>
+                <span class="quest-day">2</span>
+                <span class="quest-text">Теперь Cursor видит твои чаты. Какие возможности это открывает?</span>
+            </li>
+            <li>
+                <span class="quest-day">3</span>
+                <span class="quest-text">Что меняется когда весь контекст про поток доступен прямо в Cursor?</span>
+            </li>
+            <li>
+                <span class="quest-day">4</span>
+                <span class="quest-text">Представь себя через 3 месяца — как выглядит твой обычный день с vibe coding?</span>
+            </li>
+            <li>
+                <span class="quest-day">5</span>
+                <span class="quest-text">Что на этой неделе вызывало сопротивление? Что давало энергию?</span>
+            </li>
+        </ul>
+    </div>
+
+    <h2>Между звонками</h2>
+    <div class="split-section">
+        <div>
+            <h3>Контент</h3>
+            <ul>
+                <li>Уроки от Лёши — пошаговые видео по Cursor</li>
+                <li>Кейсы «что, так можно было?» — примеры от других</li>
+            </ul>
+        </div>
+        <div>
+            <h3>Практика</h3>
+            <ul>
+                <li>Трек заданий Play Around — задания на каждый день</li>
+                <li>Микро-квесты с GPT-коучем — трансформационные задания</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="minimum-card">
+        <h2>Обязательный минимум</h2>
+        <ul class="minimum-list">
+            <li>
+                <div>
+                    <strong>Получать удовольствие</strong><br>
+                    Спрашивать себя: «как я могу ещё на 5% получить удовольствие от этого процесса?»
+                </div>
+            </li>
+            <li>
+                <div>
+                    <strong>Трек Play Around</strong><br>
+                    Делать задания, тыкать, пробовать
+                </div>
+            </li>
+            <li>
+                <div>
+                    <strong>Делиться находками</strong><br>
+                    Кидать в «что, так можно было?» свои открытия
+                </div>
+            </li>
+        </ul>
+    </div>
+
+</body>
+</html>
