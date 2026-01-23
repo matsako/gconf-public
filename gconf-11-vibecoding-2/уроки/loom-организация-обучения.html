@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Как организовать обучающий процесс</title>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #F5F3EB;
+            color: #2C2C2C;
+            line-height: 1.6;
+        }
+
+        .slide {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 80px;
+            border-bottom: 1px solid #d4d0c4;
+        }
+
+        .slide-content {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        h1 {
+            font-family: 'Merriweather', serif;
+            font-size: 3.2rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: #1a1a2e;
+        }
+
+        h2 {
+            font-family: 'Merriweather', serif;
+            font-size: 2.4rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: #1a1a2e;
+        }
+
+        .slide-number {
+            font-family: 'Merriweather', serif;
+            font-size: 1rem;
+            color: #16213e;
+            opacity: 0.6;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.1em;
+        }
+
+        .subtitle {
+            font-family: 'Merriweather', serif;
+            font-style: italic;
+            font-size: 1.4rem;
+            text-align: center;
+            color: #555;
+            margin-bottom: 2rem;
+        }
+
+        p {
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card {
+            background: #FAF7F2;
+            border: 1px solid #16213e;
+            border-radius: 4px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .card-title {
+            font-family: 'Merriweather', serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #16213e;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .highlight {
+            font-family: 'Merriweather', serif;
+            font-style: italic;
+            font-size: 1.6rem;
+            color: #16213e;
+            text-align: center;
+            padding: 2rem 0;
+            border-left: 3px solid #16213e;
+            padding-left: 2rem;
+            margin: 2rem 0;
+        }
+
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        li {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #16213e;
+        }
+
+        .time-block {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .time-segment {
+            background: #FAF7F2;
+            border: 1px solid #16213e;
+            padding: 1.5rem 2rem;
+            text-align: center;
+            border-radius: 4px;
+        }
+
+        .time-segment .number {
+            font-family: 'Merriweather', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #16213e;
+        }
+
+        .time-segment .label {
+            font-size: 0.9rem;
+            color: #555;
+            margin-top: 0.5rem;
+        }
+
+        .example {
+            background: #FAF7F2;
+            border-left: 3px solid #0ea5e9;
+            padding: 1.5rem 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .example-label {
+            font-size: 0.85rem;
+            color: #0ea5e9;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .summary-item {
+            background: #FAF7F2;
+            border: 1px solid #16213e;
+            padding: 1.2rem 1.5rem;
+            border-radius: 4px;
+        }
+
+        .summary-item .num {
+            font-family: 'Merriweather', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #16213e;
+            margin-right: 0.5rem;
+        }
+
+        .bottom-note {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #d4d0c4;
+        }
+
+        .bottom-note p {
+            font-family: 'Merriweather', serif;
+            font-style: italic;
+            font-size: 1.1rem;
+            color: #555;
+        }
+
+        .title-slide {
+            text-align: center;
+        }
+
+        .title-slide h1 {
+            font-size: 3.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .source {
+            font-size: 0.9rem;
+            color: #888;
+            margin-top: 3rem;
+        }
+
+        @media (max-width: 768px) {
+            .slide {
+                padding: 40px 24px;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+            h2 {
+                font-size: 1.6rem;
+            }
+            .time-block {
+                flex-direction: column;
+            }
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Slide 1: Title -->
+<section class="slide title-slide">
+    <div class="slide-content">
+        <h1>Как организовать обучающий процесс</h1>
+        <p class="subtitle">без стресса, с удовольствием, чтобы оно реально случалось</p>
+        <p class="source">личный опыт + atomic habits</p>
+    </div>
+</section>
+
+<!-- Slide 2: Regular Slot -->
+<section class="slide">
+    <div class="slide-content">
+        <p class="slide-number">01</p>
+        <h2>Регулярный слот в календаре</h2>
+        
+        <p>Не "когда будет время", а конкретный слот.</p>
+        
+        <div class="time-block">
+            <div class="time-segment">
+                <div class="number">10</div>
+                <div class="label">минут<br>подготовка</div>
+            </div>
+            <div class="time-segment">
+                <div class="number">60</div>
+                <div class="label">минут<br>чистое время</div>
+            </div>
+            <div class="time-segment">
+                <div class="number">10</div>
+                <div class="label">минут<br>выход</div>
+            </div>
+        </div>
+        
+        <p class="highlight">80 минут в календаре = 60 минут реальной работы</p>
+    </div>
+</section>
+
+<!-- Slide 3: Protected Time -->
+<section class="slide">
+    <div class="slide-content">
+        <p class="slide-number">02</p>
+        <h2>Защищённое время</h2>
+        
+        <p>Слот должен случиться с высокой вероятностью.<br>Он не должен конфликтовать с важными ритуалами.</p>
+        
+        <div class="example">
+            <p class="example-label">Пример: утро</p>
+            <p>Ритуал: просыпаюсь → прогулка к кофейне → час чилю с кофе → завтрак → работа. Никаких звонков в 8:20, если в 8:00 я на кофе.</p>
+        </div>
+        
+        <div class="example">
+            <p class="example-label">Пример: вечер</p>
+            <p>Прогулка с термосом чая + GPT. Разгоняю вопрос ~час. Закрывает шаги, переключает в медленный режим, готовит ко сну.</p>
+        </div>
+        
+        <p class="highlight">Экспериментируй, найди где НЕ конфликтует и где естественно ложится</p>
+    </div>
+</section>
+
+<!-- Slide 4: Enjoyment -->
+<section class="slide">
+    <div class="slide-content">
+        <p class="slide-number">03</p>
+        <h2>Удовольствие от процесса</h2>
+        
+        <p>Не "надо отстрелять", а реальный кайф.</p>
+        
+        <div class="card">
+            <p class="card-title">Ритуал подготовки</p>
+            <ul>
+                <li>Термос который нравится</li>
+                <li>Чай который хочется пить</li>
+                <li>Тёплая удобная одежда</li>
+                <li>Зарядка: телефон, airpods, watch</li>
+                <li>Выбрать вопрос заранее</li>
+                <li>Настроиться</li>
+            </ul>
+        </div>
+        
+        <p class="highlight">Сам процесс подготовки — уже часть удовольствия</p>
+    </div>
+</section>
+
+<!-- Slide 5: Constant Place -->
+<section class="slide">
+    <div class="slide-content">
+        <p class="slide-number">04</p>
+        <h2>Постоянное место</h2>
+        
+        <p>Выбери ОДНО место для слота.</p>
+        
+        <div class="card">
+            <p class="card-title">Что происходит</p>
+            <p>Тело и мозг начинают ассоциировать это место с кайфом + обучением + вайб-кодингом.</p>
+            <p style="margin-top: 1rem; margin-bottom: 0;">Возникает предвкушение — садишься и уже в потоке.</p>
+        </div>
+        
+        <p>Подумай: что тебе нужно в процессе?<br>Чай, кресло, тишина, музыка — организуй под себя.</p>
+    </div>
+</section>
+
+<!-- Slide 6: Iterations -->
+<section class="slide">
+    <div class="slide-content">
+        <p class="slide-number">05</p>
+        <h2>Итерации</h2>
+        
+        <ul>
+            <li>Быстро начать пробовать</li>
+            <li>Толерантность к неидеальной первой попытке</li>
+            <li>НЕ ждать "идеальных условий"</li>
+        </ul>
+        
+        <p class="highlight">После каждого раза: "Что могу улучшить в следующий раз?"</p>
+        
+        <div class="card">
+            <p class="card-title">Важный фрейм</p>
+            <p style="margin-bottom: 0;">Делаем ДЛЯ СЕБЯ, не для кого-то. Это практика заботы о себе. Детали имеют значение — дают кумулятивный эффект.</p>
+        </div>
+        
+        <p>За 1-2-3 итерации реально поймёшь как хочешь это обустраивать.</p>
+    </div>
+</section>
+
+<!-- Slide 7: Exit -->
+<section class="slide">
+    <div class="slide-content">
+        <p class="slide-number">06</p>
+        <h2>Выход из слота</h2>
+        
+        <p>Продумай как завершать.<br>Плавное переключение, не резкий обрыв.</p>
+        
+        <div class="example">
+            <p class="example-label">Пример</p>
+            <p>После вечерней прогулки → не открываю компьютер → не ем → душ → устройства на зарядку → сон</p>
+        </div>
+        
+        <p class="highlight">Выход — это часть ритуала</p>
+    </div>
+</section>
+
+<!-- Slide 8: Habit Stacking -->
+<section class="slide">
+    <div class="slide-content">
+        <p class="slide-number">07</p>
+        <h2>Связывание рутин</h2>
+        <p style="color: #555; margin-top: -1.5rem; margin-bottom: 2rem;">habit stacking из atomic habits</p>
+        
+        <p>Две рутины работают лучше когда соединены.<br>Одна вытекает из другой органично.</p>
+        
+        <div class="card">
+            <p class="card-title">Как применить</p>
+            <ul>
+                <li>Посмотри на свои существующие регулярные рутины</li>
+                <li>Гипотеза: новый слот ДО или ПОСЛЕ существующей</li>
+                <li>Скорее всего приживётся — уже есть триггер</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 9: Summary -->
+<section class="slide">
+    <div class="slide-content">
+        <h2 style="text-align: center;">Резюме</h2>
+        
+        <div class="summary-grid">
+            <div class="summary-item"><span class="num">1</span> Слот в календаре (80 мин)</div>
+            <div class="summary-item"><span class="num">2</span> Защищённое время</div>
+            <div class="summary-item"><span class="num">3</span> Удовольствие от процесса</div>
+            <div class="summary-item"><span class="num">4</span> Постоянное место</div>
+            <div class="summary-item"><span class="num">5</span> Итерации</div>
+            <div class="summary-item"><span class="num">6</span> Выход из слота</div>
+            <div class="summary-item" style="grid-column: span 2; text-align: center;"><span class="num">7</span> Habit stacking</div>
+        </div>
+        
+        <div class="bottom-note">
+            <p>Не пытайся сделать идеально с первого раза</p>
+            <p>Делай для себя, заботься о себе</p>
+            <p>Детали имеют значение</p>
+        </div>
+    </div>
+</section>
+
+</body>
+</html>

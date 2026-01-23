@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2048 • gconf поток 11</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <title>2048</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -12,17 +12,9 @@
             box-sizing: border-box;
         }
 
-        :root {
-            --lime: #c4f034;
-            --lime-dark: #a8d42a;
-            --lime-light: #d4ff4a;
-            --dark: #2d3436;
-            --dark-light: #3d4446;
-        }
-
         body {
             font-family: 'Inter', sans-serif;
-            background: var(--lime);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -31,85 +23,55 @@
             padding: 20px;
         }
 
-        .logo {
-            display: flex;
-            align-items: baseline;
-            gap: 0.25rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .logo-g {
-            font-family: 'Playfair Display', serif;
-            font-size: 3rem;
-            font-weight: 700;
-            color: var(--dark);
-        }
-
-        .logo-conf {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--dark);
-        }
-
-        .stream-badge {
-            background: var(--dark);
-            color: var(--lime);
-            padding: 0.25rem 0.75rem;
-            border-radius: 100px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            letter-spacing: 0.05em;
-            margin-bottom: 1rem;
-        }
-
         h1 {
             font-size: 4rem;
             font-weight: 800;
-            color: var(--dark);
+            color: #fff;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.3);
             margin-bottom: 1rem;
         }
 
         .header {
             display: flex;
-            gap: 1.5rem;
+            gap: 2rem;
             align-items: center;
             margin-bottom: 1.5rem;
         }
 
         .score-box {
-            background: var(--dark);
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
             border-radius: 12px;
             padding: 0.75rem 1.5rem;
             text-align: center;
+            color: #fff;
         }
 
         .score-label {
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.1em;
-            color: var(--lime);
             opacity: 0.8;
         }
 
         .score-value {
             font-size: 1.5rem;
             font-weight: 700;
-            color: var(--lime);
         }
 
         .game-container {
-            background: var(--dark);
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(20px);
             border-radius: 20px;
             padding: 15px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
         }
 
         .grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 12px;
-            background: var(--dark-light);
+            background: rgba(0,0,0,0.2);
             border-radius: 12px;
             padding: 12px;
         }
@@ -117,33 +79,28 @@
         .cell {
             width: 80px;
             height: 80px;
-            background: rgba(196, 240, 52, 0.1);
+            background: rgba(255,255,255,0.1);
             border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.75rem;
             font-weight: 700;
-            color: var(--dark);
+            color: #fff;
             transition: all 0.15s ease;
         }
 
-        .cell[data-value="2"] { background: #f0f5e0; color: var(--dark); }
-        .cell[data-value="4"] { background: #e5f0c0; color: var(--dark); }
-        .cell[data-value="8"] { background: #d4f034; color: var(--dark); }
-        .cell[data-value="16"] { background: #c4f034; color: var(--dark); }
-        .cell[data-value="32"] { background: #a8d42a; color: var(--dark); }
-        .cell[data-value="64"] { background: #8cb820; color: #fff; }
-        .cell[data-value="128"] { background: var(--dark); color: var(--lime); font-size: 1.5rem; border: 3px solid var(--lime); }
-        .cell[data-value="256"] { background: var(--dark); color: var(--lime); font-size: 1.5rem; border: 3px solid var(--lime); }
-        .cell[data-value="512"] { background: var(--dark); color: var(--lime); font-size: 1.5rem; border: 3px solid var(--lime); }
-        .cell[data-value="1024"] { background: var(--lime); color: var(--dark); font-size: 1.25rem; box-shadow: 0 0 20px var(--lime); }
-        .cell[data-value="2048"] { background: var(--lime); color: var(--dark); font-size: 1.25rem; box-shadow: 0 0 40px var(--lime), 0 0 80px var(--lime); animation: glow 1s ease infinite alternate; }
-
-        @keyframes glow {
-            from { box-shadow: 0 0 40px var(--lime), 0 0 80px var(--lime); }
-            to { box-shadow: 0 0 60px var(--lime), 0 0 120px var(--lime-light); }
-        }
+        .cell[data-value="2"] { background: #eee4da; color: #776e65; }
+        .cell[data-value="4"] { background: #ede0c8; color: #776e65; }
+        .cell[data-value="8"] { background: #f2b179; color: #fff; }
+        .cell[data-value="16"] { background: #f59563; color: #fff; }
+        .cell[data-value="32"] { background: #f67c5f; color: #fff; }
+        .cell[data-value="64"] { background: #f65e3b; color: #fff; }
+        .cell[data-value="128"] { background: #edcf72; color: #fff; font-size: 1.5rem; }
+        .cell[data-value="256"] { background: #edcc61; color: #fff; font-size: 1.5rem; }
+        .cell[data-value="512"] { background: #edc850; color: #fff; font-size: 1.5rem; }
+        .cell[data-value="1024"] { background: #edc53f; color: #fff; font-size: 1.25rem; }
+        .cell[data-value="2048"] { background: #edc22e; color: #fff; font-size: 1.25rem; box-shadow: 0 0 30px #edc22e; }
 
         .cell.pop {
             animation: pop 0.2s ease;
@@ -172,11 +129,12 @@
         }
 
         button {
-            background: var(--dark);
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
             border: none;
             border-radius: 12px;
             padding: 1rem 2rem;
-            color: var(--lime);
+            color: #fff;
             font-family: inherit;
             font-size: 1rem;
             font-weight: 600;
@@ -185,16 +143,15 @@
         }
 
         button:hover {
+            background: rgba(255,255,255,0.3);
             transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
         .instructions {
             margin-top: 1.5rem;
-            color: var(--dark);
+            color: rgba(255,255,255,0.7);
             font-size: 0.875rem;
             text-align: center;
-            opacity: 0.7;
         }
 
         .game-over {
@@ -203,7 +160,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(45, 52, 54, 0.95);
+            background: rgba(0,0,0,0.8);
             display: none;
             align-items: center;
             justify-content: center;
@@ -217,71 +174,18 @@
 
         .game-over h2 {
             font-size: 3rem;
-            color: var(--lime);
+            color: #fff;
             margin-bottom: 1rem;
         }
 
         .game-over p {
-            color: rgba(196, 240, 52, 0.7);
+            color: rgba(255,255,255,0.7);
             font-size: 1.25rem;
             margin-bottom: 2rem;
         }
 
-        .game-over button {
-            background: var(--lime);
-            color: var(--dark);
-        }
-
-        .win h2 {
-            animation: glow-text 1s ease infinite alternate;
-        }
-
-        @keyframes glow-text {
-            from { text-shadow: 0 0 20px var(--lime); }
-            to { text-shadow: 0 0 40px var(--lime-light), 0 0 80px var(--lime); }
-        }
-
-        /* Mobile Controls */
-        .mobile-controls {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.5rem;
-            margin-top: 1.5rem;
-        }
-
-        .controls-row {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .control-btn {
-            width: 60px;
-            height: 60px;
-            background: var(--dark);
-            border: none;
-            border-radius: 12px;
-            color: var(--lime);
-            font-size: 1.5rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
-        }
-
-        .control-btn:hover {
-            background: var(--dark-light);
-            transform: scale(1.05);
-        }
-
-        .control-btn:active {
-            transform: scale(0.95);
-            background: var(--lime);
-            color: var(--dark);
+        .win {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
         }
 
         @media (max-width: 400px) {
@@ -294,20 +198,9 @@
                 font-size: 3rem;
             }
         }
-
-        /* Prevent scroll on mobile when swiping */
-        html, body {
-            overscroll-behavior: none;
-        }
     </style>
 </head>
 <body>
-    <div class="logo">
-        <span class="logo-g">g</span>
-        <span class="logo-conf">conf.</span>
-    </div>
-    <div class="stream-badge">поток 11</div>
-    
     <h1>2048</h1>
     
     <div class="header">
@@ -329,19 +222,7 @@
         <button onclick="newGame()">Новая игра</button>
     </div>
 
-    <!-- Mobile Controls -->
-    <div class="mobile-controls">
-        <div class="controls-row">
-            <button class="control-btn" onclick="move('up')">↑</button>
-        </div>
-        <div class="controls-row">
-            <button class="control-btn" onclick="move('left')">←</button>
-            <button class="control-btn" onclick="move('down')">↓</button>
-            <button class="control-btn" onclick="move('right')">→</button>
-        </div>
-    </div>
-
-    <p class="instructions">Стрелки на клавиатуре, свайпы или кнопки ↑↓←→</p>
+    <p class="instructions">Используй стрелки ← ↑ → ↓ или свайпай</p>
 
     <div class="game-over" id="gameOver">
         <h2 id="gameOverTitle">Game Over</h2>
@@ -352,7 +233,7 @@
     <script>
         let grid = [];
         let score = 0;
-        let best = localStorage.getItem('best2048gconf') || 0;
+        let best = localStorage.getItem('best2048') || 0;
 
         document.getElementById('best').textContent = best;
 
@@ -363,7 +244,7 @@
             addRandomTile();
             addRandomTile();
             render();
-            document.getElementById('gameOver').classList.remove('show', 'win');
+            document.getElementById('gameOver').classList.remove('show');
         }
 
         function addRandomTile() {
@@ -405,51 +286,57 @@
             document.getElementById('score').textContent = score;
             if (score > best) {
                 best = score;
-                localStorage.setItem('best2048gconf', best);
+                localStorage.setItem('best2048', best);
                 document.getElementById('best').textContent = best;
             }
         }
 
         function slide(row) {
             let arr = row.filter(x => x !== 0);
+            let merged = [];
             for (let i = 0; i < arr.length; i++) {
                 if (arr[i] === arr[i + 1]) {
                     arr[i] *= 2;
                     score += arr[i];
                     arr[i + 1] = 0;
+                    merged.push(i);
                 }
             }
             arr = arr.filter(x => x !== 0);
             while (arr.length < 4) arr.push(0);
-            return arr;
+            return {arr, merged};
         }
 
         function move(direction) {
+            let moved = false;
             const oldGrid = JSON.stringify(grid);
 
             if (direction === 'left') {
                 for (let i = 0; i < 4; i++) {
-                    grid[i] = slide(grid[i]);
+                    const {arr} = slide(grid[i]);
+                    grid[i] = arr;
                 }
             } else if (direction === 'right') {
                 for (let i = 0; i < 4; i++) {
-                    grid[i] = slide(grid[i].reverse()).reverse();
+                    const {arr} = slide(grid[i].reverse());
+                    grid[i] = arr.reverse();
                 }
             } else if (direction === 'up') {
                 for (let j = 0; j < 4; j++) {
                     let col = [grid[0][j], grid[1][j], grid[2][j], grid[3][j]];
-                    col = slide(col);
-                    for (let i = 0; i < 4; i++) grid[i][j] = col[i];
+                    const {arr} = slide(col);
+                    for (let i = 0; i < 4; i++) grid[i][j] = arr[i];
                 }
             } else if (direction === 'down') {
                 for (let j = 0; j < 4; j++) {
                     let col = [grid[3][j], grid[2][j], grid[1][j], grid[0][j]];
-                    col = slide(col);
-                    for (let i = 0; i < 4; i++) grid[3-i][j] = col[i];
+                    const {arr} = slide(col);
+                    for (let i = 0; i < 4; i++) grid[3-i][j] = arr[i];
                 }
             }
 
             if (JSON.stringify(grid) !== oldGrid) {
+                moved = true;
                 addRandomTile();
                 render();
                 updateScore();
@@ -501,20 +388,14 @@
             }
         });
 
-        // Touch controls (improved for mobile)
+        // Touch controls
         let touchStartX, touchStartY;
-        const gameContainer = document.querySelector('.game-container');
-        
-        gameContainer.addEventListener('touchstart', (e) => {
+        document.addEventListener('touchstart', (e) => {
             touchStartX = e.touches[0].clientX;
             touchStartY = e.touches[0].clientY;
-        }, { passive: true });
+        });
 
-        gameContainer.addEventListener('touchmove', (e) => {
-            e.preventDefault(); // Prevent scrolling while swiping on game
-        }, { passive: false });
-
-        gameContainer.addEventListener('touchend', (e) => {
+        document.addEventListener('touchend', (e) => {
             if (!touchStartX || !touchStartY) return;
             const dx = e.changedTouches[0].clientX - touchStartX;
             const dy = e.changedTouches[0].clientY - touchStartY;
