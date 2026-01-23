@@ -260,14 +260,20 @@
             }
         }
 
-        /* Prevent scroll on mobile - make it feel like an app */
+        /* Desktop - normal behavior */
         html, body {
             overscroll-behavior: none;
-            overflow: hidden;
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            touch-action: none;
+        }
+
+        /* Mobile - app-like behavior */
+        @media (max-width: 768px), (pointer: coarse) {
+            html, body {
+                overflow: hidden;
+                position: fixed;
+                width: 100%;
+                height: 100%;
+                touch-action: none;
+            }
         }
 
         /* Make everything fit on screen */
@@ -293,6 +299,23 @@
 
         .instructions {
             margin-top: 0.5rem;
+        }
+
+        /* Show different hints for desktop/mobile */
+        .desktop-hint {
+            display: block;
+        }
+        .mobile-hint {
+            display: none;
+        }
+
+        @media (max-width: 768px), (pointer: coarse) {
+            .desktop-hint {
+                display: none;
+            }
+            .mobile-hint {
+                display: block;
+            }
         }
     </style>
 </head>
@@ -324,7 +347,8 @@
         <button onclick="newGame()">Новая игра</button>
     </div>
 
-    <p class="instructions">👆 Свайпай в любом месте</p>
+    <p class="instructions desktop-hint">Используй стрелки ← ↑ → ↓</p>
+    <p class="instructions mobile-hint">👆 Свайпай в любом месте</p>
 
     <div class="game-over" id="gameOver">
         <h2 id="gameOverTitle">Game Over</h2>
@@ -485,50 +509,55 @@
         });
 
         // Touch controls - swipe anywhere on screen like native app
-        let touchStartX, touchStartY, touchStartTime;
+        // Only active on touch devices
+        const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
         
-        document.addEventListener('touchstart', (e) => {
-            touchStartX = e.touches[0].clientX;
-            touchStartY = e.touches[0].clientY;
-            touchStartTime = Date.now();
-        }, { passive: true });
-
-        document.addEventListener('touchmove', (e) => {
-            // Prevent scrolling while playing
-            if (touchStartX !== null) {
-                e.preventDefault();
-            }
-        }, { passive: false });
-
-        document.addEventListener('touchend', (e) => {
-            if (touchStartX === null || touchStartY === null) return;
+        if (isTouchDevice) {
+            let touchStartX, touchStartY, touchStartTime;
             
-            const dx = e.changedTouches[0].clientX - touchStartX;
-            const dy = e.changedTouches[0].clientY - touchStartY;
-            const absDx = Math.abs(dx);
-            const absDy = Math.abs(dy);
-            const timeDiff = Date.now() - touchStartTime;
+            document.addEventListener('touchstart', (e) => {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+                touchStartTime = Date.now();
+            }, { passive: true });
 
-            // Quick swipe detection (within 300ms and moved at least 30px)
-            if (timeDiff < 300 && Math.max(absDx, absDy) > 30) {
-                if (absDx > absDy) {
-                    move(dx > 0 ? 'right' : 'left');
-                } else {
-                    move(dy > 0 ? 'down' : 'up');
+            document.addEventListener('touchmove', (e) => {
+                // Prevent scrolling while playing on mobile
+                if (touchStartX !== null) {
+                    e.preventDefault();
                 }
-            }
-            // Slower drag also works (moved at least 50px)
-            else if (Math.max(absDx, absDy) > 50) {
-                if (absDx > absDy) {
-                    move(dx > 0 ? 'right' : 'left');
-                } else {
-                    move(dy > 0 ? 'down' : 'up');
+            }, { passive: false });
+
+            document.addEventListener('touchend', (e) => {
+                if (touchStartX === null || touchStartY === null) return;
+                
+                const dx = e.changedTouches[0].clientX - touchStartX;
+                const dy = e.changedTouches[0].clientY - touchStartY;
+                const absDx = Math.abs(dx);
+                const absDy = Math.abs(dy);
+                const timeDiff = Date.now() - touchStartTime;
+
+                // Quick swipe detection (within 300ms and moved at least 30px)
+                if (timeDiff < 300 && Math.max(absDx, absDy) > 30) {
+                    if (absDx > absDy) {
+                        move(dx > 0 ? 'right' : 'left');
+                    } else {
+                        move(dy > 0 ? 'down' : 'up');
+                    }
                 }
-            }
-            
-            touchStartX = null;
-            touchStartY = null;
-        });
+                // Slower drag also works (moved at least 50px)
+                else if (Math.max(absDx, absDy) > 50) {
+                    if (absDx > absDy) {
+                        move(dx > 0 ? 'right' : 'left');
+                    } else {
+                        move(dy > 0 ? 'down' : 'up');
+                    }
+                }
+                
+                touchStartX = null;
+                touchStartY = null;
+            });
+        }
 
         // Start game
         init();
