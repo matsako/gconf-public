@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Island Survival 🏝️</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        h1 {
+            color: #fff;
+            font-size: 2rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .controls-hint {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9rem;
+        }
+
+        canvas {
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+        }
+
+        .inventory {
+            display: flex;
+            gap: 15px;
+            background: rgba(0,0,0,0.6);
+            padding: 12px 24px;
+            border-radius: 12px;
+            color: white;
+            font-size: 1.1rem;
+        }
+
+        .inventory-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .inventory-item .count {
+            font-weight: bold;
+            min-width: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>🏝️ Island Survival</h1>
+        <canvas id="game" width="800" height="600"></canvas>
+        <div class="inventory" id="inventory">
+            <div class="inventory-item">🪵 <span class="count" id="inv-wood">0</span></div>
+            <div class="inventory-item">🪨 <span class="count" id="inv-stone">0</span></div>
+            <div class="inventory-item">🥥 <span class="count" id="inv-coconut">0</span></div>
+            <div class="inventory-item">🌿 <span class="count" id="inv-fiber">0</span></div>
+        </div>
+        <p class="controls-hint">WASD — движение | E — собрать | B — строить</p>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('game');
+        const ctx = canvas.getContext('2d');
+
+        // === НАСТРОЙКИ ИГРЫ ===
+        const TILE_SIZE = 64;
+        const MAP_WIDTH = 20;
+        const MAP_HEIGHT = 15;
+
+        // === ИГРОК ===
+        const player = {
+            x: 400,
+            y: 300,
+            width: 40,
+            height: 40,
+            speed: 4,
+            // Направление движения для будущей анимации
+            direction: 'down'
+        };
+
+        // === ОБЪЕКТЫ НА КАРТЕ ===
+        const objects = [
+            // Деревья (пальмы)
+            { x: 150, y: 120, type: 'palm', emoji: '🌴', width: 50, height: 60 },
+            { x: 600, y: 100, type: 'palm', emoji: '🌴', width: 50, height: 60 },
+            { x: 700, y: 350, type: 'palm', emoji: '🌴', width: 50, height: 60 },
+            { x: 100, y: 400, type: 'palm', emoji: '🌴', width: 50, height: 60 },
+            
+            // Обычные деревья
+            { x: 300, y: 80, type: 'tree', emoji: '🌳', width: 50, height: 60 },
+            { x: 550, y: 450, type: 'tree', emoji: '🌳', width: 50, height: 60 },
+            { x: 200, y: 500, type: 'tree', emoji: '🌳', width: 50, height: 60 },
+            
+            // Камни
+            { x: 450, y: 200, type: 'rock', emoji: '🪨', width: 40, height: 40 },
+            { x: 250, y: 350, type: 'rock', emoji: '🪨', width: 40, height: 40 },
+            { x: 650, y: 500, type: 'rock', emoji: '🪨', width: 40, height: 40 },
+            { x: 500, y: 400, type: 'rock', emoji: '🪨', width: 40, height: 40 },
+
+            // Кусты
+            { x: 350, y: 150, type: 'bush', emoji: '🌿', width: 35, height: 35 },
+            { x: 180, y: 250, type: 'bush', emoji: '🌿', width: 35, height: 35 },
+            { x: 620, y: 280, type: 'bush', emoji: '🌿', width: 35, height: 35 },
+
+            // Цветы (декор)
+            { x: 400, y: 500, type: 'flower', emoji: '🌺', width: 25, height: 25 },
+            { x: 520, y: 150, type: 'flower', emoji: '🌸', width: 25, height: 25 },
+            { x: 130, y: 320, type: 'flower', emoji: '🌼', width: 25, height: 25 },
+        ];
+
+        // === ИНВЕНТАРЬ ===
+        const inventory = {
+            wood: 0,
+            stone: 0,
+            coconut: 0,
+            fiber: 0
+        };
+
+        // Какие ресурсы дают объекты
+        const resourceMap = {
+            palm: { resource: 'coconut', amount: 2 },
+            tree: { resource: 'wood', amount: 3 },
+            rock: { resource: 'stone', amount: 2 },
+            bush: { resource: 'fiber', amount: 1 }
+        };
+
+        // Обновляем UI инвентаря
+        function updateInventoryUI() {
+            document.getElementById('inv-wood').textContent = inventory.wood;
+            document.getElementById('inv-stone').textContent = inventory.stone;
+            document.getElementById('inv-coconut').textContent = inventory.coconut;
+            document.getElementById('inv-fiber').textContent = inventory.fiber;
+        }
+
+        // Находим ближайший собираемый объект
+        function findNearbyObject() {
+            const playerCenterX = player.x + player.width / 2;
+            const playerCenterY = player.y + player.height / 2;
+            const interactionRadius = 60; // Радиус взаимодействия
+
+            let closest = null;
+            let closestDist = Infinity;
+
+            for (let i = 0; i < objects.length; i++) {
+                const obj = objects[i];
+                // Можно собирать только деревья, пальмы, камни и кусты
+                if (!resourceMap[obj.type]) continue;
+
+                const objCenterX = obj.x + obj.width / 2;
+                const objCenterY = obj.y + obj.height / 2;
+                const dist = Math.sqrt(
+                    Math.pow(playerCenterX - objCenterX, 2) + 
+                    Math.pow(playerCenterY - objCenterY, 2)
+                );
+
+                if (dist < interactionRadius && dist < closestDist) {
+                    closest = { obj, index: i };
+                    closestDist = dist;
+                }
+            }
+
+            return closest;
+        }
+
+        // Собираем ресурс
+        function collectResource() {
+            const nearby = findNearbyObject();
+            if (!nearby) return;
+
+            const { obj, index } = nearby;
+            const resourceInfo = resourceMap[obj.type];
+
+            if (resourceInfo) {
+                // Добавляем ресурс в инвентарь
+                inventory[resourceInfo.resource] += resourceInfo.amount;
+                updateInventoryUI();
+
+                // Удаляем объект с карты
+                objects.splice(index, 1);
+
+                // Можно добавить звук или анимацию сбора
+                showCollectEffect(obj);
+            }
+        }
+
+        // Эффект сбора (простая анимация)
+        let collectEffects = [];
+        function showCollectEffect(obj) {
+            collectEffects.push({
+                x: obj.x + obj.width / 2,
+                y: obj.y,
+                text: '+' + resourceMap[obj.type].amount,
+                alpha: 1,
+                offsetY: 0
+            });
+        }
+
+        // === СТРОИТЕЛЬСТВО ===
+        let buildMode = false;
+
+        // Рецепты построек (buildTime в секундах)
+        const buildRecipes = [
+            { 
+                name: 'Костёр', 
+                emoji: '🔥', 
+                type: 'campfire',
+                cost: { wood: 5, stone: 3 },
+                buildTime: 5,  // 5 секунд
+                width: 40, 
+                height: 40 
+            },
+            { 
+                name: 'Палатка', 
+                emoji: '⛺', 
+                type: 'tent',
+                cost: { wood: 8, fiber: 5 },
+                buildTime: 15, // 15 секунд
+                width: 55, 
+                height: 55 
+            },
+            { 
+                name: 'Домик', 
+                emoji: '🏠', 
+                type: 'house',
+                cost: { wood: 15, stone: 10 },
+                buildTime: 30, // 30 секунд
+                width: 60, 
+                height: 65 
+            }
+        ];
+
+        // Текущая стройка (если игрок строит)
+        let currentBuilding = null;
+
+        // Проверяем хватает ли ресурсов
+        function canBuild(recipe) {
+            for (const [resource, amount] of Object.entries(recipe.cost)) {
+                if (inventory[resource] < amount) return false;
+            }
+            return true;
+        }
+
+        // Строим!
+        function build(recipeIndex) {
+            if (recipeIndex < 0 || recipeIndex >= buildRecipes.length) return;
+            
+            // Нельзя начать новую стройку пока идёт другая
+            if (currentBuilding) {
+                showBuildError('Сначала достройте текущее!');
+                return;
+            }
+            
+            const recipe = buildRecipes[recipeIndex];
+            
+            if (!canBuild(recipe)) {
+                showBuildError('Не хватает ресурсов!');
+                return;
+            }
+
+            // Списываем ресурсы
+            for (const [resource, amount] of Object.entries(recipe.cost)) {
+                inventory[resource] -= amount;
+            }
+            updateInventoryUI();
+
+            // Находим место для постройки (рядом с игроком)
+            const buildX = player.x + player.width + 20;
+            const buildY = player.y;
+
+            // Создаём "строящийся" объект
+            const newBuilding = {
+                x: buildX,
+                y: buildY,
+                type: recipe.type,
+                emoji: '🚧',  // Стройка пока идёт
+                finalEmoji: recipe.emoji,
+                name: recipe.name,
+                width: recipe.width,
+                height: recipe.height,
+                isBuilding: true,
+                buildProgress: 0,
+                buildTime: recipe.buildTime,
+                buildStartTime: Date.now()
+            };
+
+            objects.push(newBuilding);
+            currentBuilding = newBuilding;
+
+            buildMode = false;
+        }
+
+        let buildError = null;
+        function showBuildError(msg) {
+            buildError = { text: msg, alpha: 1 };
+        }
+
+        // === УПРАВЛЕНИЕ ===
+        const keys = {
+            up: false,
+            down: false,
+            left: false,
+            right: false
+        };
+
+        document.addEventListener('keydown', (e) => {
+            // Используем e.code для физических клавиш (работает с любой раскладкой)
+            switch(e.code) {
+                case 'KeyW':
+                case 'ArrowUp':
+                    keys.up = true;
+                    e.preventDefault();
+                    break;
+                case 'KeyS':
+                case 'ArrowDown':
+                    keys.down = true;
+                    e.preventDefault();
+                    break;
+                case 'KeyA':
+                case 'ArrowLeft':
+                    keys.left = true;
+                    e.preventDefault();
+                    break;
+                case 'KeyD':
+                case 'ArrowRight':
+                    keys.right = true;
+                    e.preventDefault();
+                    break;
+                case 'KeyE':
+                case 'Space':
+                    if (!buildMode) {
+                        collectResource();
+                    }
+                    e.preventDefault();
+                    break;
+                case 'KeyB':
+                    buildMode = !buildMode;
+                    e.preventDefault();
+                    break;
+                case 'Digit1':
+                case 'Numpad1':
+                    if (buildMode) build(0);
+                    break;
+                case 'Digit2':
+                case 'Numpad2':
+                    if (buildMode) build(1);
+                    break;
+                case 'Digit3':
+                case 'Numpad3':
+                    if (buildMode) build(2);
+                    break;
+                case 'Escape':
+                    buildMode = false;
+                    break;
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            switch(e.code) {
+                case 'KeyW':
+                case 'ArrowUp':
+                    keys.up = false;
+                    break;
+                case 'KeyS':
+                case 'ArrowDown':
+                    keys.down = false;
+                    break;
+                case 'KeyA':
+                case 'ArrowLeft':
+                    keys.left = false;
+                    break;
+                case 'KeyD':
+                case 'ArrowRight':
+                    keys.right = false;
+                    break;
+            }
+        });
+
+        // === КОЛЛИЗИИ ===
+        function checkCollision(newX, newY) {
+            const playerBox = {
+                x: newX,
+                y: newY,
+                width: player.width,
+                height: player.height
+            };
+
+            for (const obj of objects) {
+                // Для деревьев коллизия только с "стволом" (нижняя часть)
+                let objBox;
+                if (obj.type === 'palm' || obj.type === 'tree') {
+                    objBox = {
+                        x: obj.x + 10,
+                        y: obj.y + obj.height - 20,
+                        width: obj.width - 20,
+                        height: 20
+                    };
+                } else if (obj.type === 'rock') {
+                    objBox = {
+                        x: obj.x,
+                        y: obj.y,
+                        width: obj.width,
+                        height: obj.height
+                    };
+                } else if (obj.isBuilding) {
+                    // Постройки — коллизия с нижней частью
+                    objBox = {
+                        x: obj.x,
+                        y: obj.y + obj.height - 25,
+                        width: obj.width,
+                        height: 25
+                    };
+                } else {
+                    // Цветы и кусты — можно проходить
+                    continue;
+                }
+
+                if (playerBox.x < objBox.x + objBox.width &&
+                    playerBox.x + playerBox.width > objBox.x &&
+                    playerBox.y < objBox.y + objBox.height &&
+                    playerBox.y + playerBox.height > objBox.y) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // === ОБНОВЛЕНИЕ ИГРЫ ===
+        function update() {
+            let newX = player.x;
+            let newY = player.y;
+
+            if (keys.up) {
+                newY -= player.speed;
+                player.direction = 'up';
+            }
+            if (keys.down) {
+                newY += player.speed;
+                player.direction = 'down';
+            }
+            if (keys.left) {
+                newX -= player.speed;
+                player.direction = 'left';
+            }
+            if (keys.right) {
+                newX += player.speed;
+                player.direction = 'right';
+            }
+
+            // Проверяем границы карты
+            newX = Math.max(0, Math.min(canvas.width - player.width, newX));
+            newY = Math.max(0, Math.min(canvas.height - player.height, newY));
+
+            // Проверяем коллизии
+            if (!checkCollision(newX, player.y)) {
+                player.x = newX;
+            }
+            if (!checkCollision(player.x, newY)) {
+                player.y = newY;
+            }
+
+            // Обновляем эффекты сбора
+            for (let i = collectEffects.length - 1; i >= 0; i--) {
+                collectEffects[i].offsetY -= 1.5;
+                collectEffects[i].alpha -= 0.02;
+                if (collectEffects[i].alpha <= 0) {
+                    collectEffects.splice(i, 1);
+                }
+            }
+
+            // Обновляем прогресс строительства
+            if (currentBuilding) {
+                const elapsed = (Date.now() - currentBuilding.buildStartTime) / 1000;
+                currentBuilding.buildProgress = Math.min(elapsed / currentBuilding.buildTime, 1);
+                
+                // Строительство завершено!
+                if (currentBuilding.buildProgress >= 1) {
+                    currentBuilding.emoji = currentBuilding.finalEmoji;
+                    currentBuilding.buildProgress = undefined; // Убираем прогресс-бар
+                    
+                    // Эффект завершения
+                    collectEffects.push({
+                        x: currentBuilding.x + currentBuilding.width / 2,
+                        y: currentBuilding.y,
+                        text: '✓ ' + currentBuilding.name + ' готов!',
+                        alpha: 1,
+                        offsetY: 0
+                    });
+                    
+                    currentBuilding = null;
+                }
+            }
+
+            // Обновляем ошибку строительства
+            if (buildError) {
+                buildError.alpha -= 0.02;
+                if (buildError.alpha <= 0) {
+                    buildError = null;
+                }
+            }
+        }
+
+        // === ОТРИСОВКА ===
+        function draw() {
+            // Фон — трава
+            const gradient = ctx.createRadialGradient(400, 300, 0, 400, 300, 500);
+            gradient.addColorStop(0, '#7ec850');
+            gradient.addColorStop(1, '#5a9a38');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Текстура травы (простые точки)
+            ctx.fillStyle = 'rgba(90, 154, 56, 0.5)';
+            for (let i = 0; i < 100; i++) {
+                const x = (i * 73) % canvas.width;
+                const y = (i * 47) % canvas.height;
+                ctx.beginPath();
+                ctx.arc(x, y, 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Сортируем объекты + игрока по Y для правильного отображения (что ниже — рисуется позже)
+            const allDrawable = [
+                ...objects.map(obj => ({ ...obj, isPlayer: false })),
+                { x: player.x, y: player.y + player.height, isPlayer: true }
+            ];
+            allDrawable.sort((a, b) => {
+                const aY = a.isPlayer ? a.y : a.y + (a.height || 0);
+                const bY = b.isPlayer ? b.y : b.y + (b.height || 0);
+                return aY - bY;
+            });
+
+            // Находим ближайший объект для подсветки
+            const nearbyObj = findNearbyObject();
+
+            // Рисуем всё
+            for (const item of allDrawable) {
+                if (item.isPlayer) {
+                    drawPlayer();
+                } else {
+                    // Подсвечиваем ближайший объект
+                    const isHighlighted = nearbyObj && nearbyObj.obj === objects.find(o => 
+                        o.x === item.x && o.y === item.y && o.type === item.type
+                    );
+                    drawObject(item, isHighlighted);
+                }
+            }
+
+            // Рисуем эффекты сбора
+            for (const effect of collectEffects) {
+                ctx.globalAlpha = effect.alpha;
+                ctx.fillStyle = '#FFD700';
+                ctx.font = 'bold 24px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(effect.text, effect.x, effect.y + effect.offsetY);
+                ctx.globalAlpha = 1;
+            }
+
+            // Подсказка "Нажми E" если рядом есть объект
+            if (nearbyObj && !buildMode) {
+                ctx.fillStyle = 'rgba(0,0,0,0.7)';
+                ctx.font = '14px sans-serif';
+                ctx.textAlign = 'center';
+                const hintX = nearbyObj.obj.x + nearbyObj.obj.width / 2;
+                const hintY = nearbyObj.obj.y - 10;
+                ctx.fillText('Нажми E', hintX, hintY);
+            }
+
+            // Меню строительства
+            if (buildMode) {
+                drawBuildMenu();
+            }
+
+            // Ошибка строительства
+            if (buildError) {
+                ctx.globalAlpha = buildError.alpha;
+                ctx.fillStyle = '#FF4444';
+                ctx.font = 'bold 20px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(buildError.text, canvas.width / 2, 100);
+                ctx.globalAlpha = 1;
+            }
+
+            // Индикатор текущего строительства (внизу экрана)
+            if (currentBuilding && !buildMode) {
+                const barWidth = 200;
+                const barHeight = 20;
+                const barX = canvas.width / 2 - barWidth / 2;
+                const barY = 30;
+                
+                // Фон
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.beginPath();
+                ctx.roundRect(barX - 10, barY - 25, barWidth + 20, barHeight + 35, 8);
+                ctx.fill();
+                
+                // Текст
+                ctx.fillStyle = '#FFF';
+                ctx.font = 'bold 14px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(`🔨 Строится: ${currentBuilding.name}`, canvas.width / 2, barY - 5);
+                
+                // Прогресс-бар
+                ctx.fillStyle = '#333';
+                ctx.beginPath();
+                ctx.roundRect(barX, barY, barWidth, barHeight, 5);
+                ctx.fill();
+                
+                // Заполнение
+                ctx.fillStyle = '#4CAF50';
+                ctx.beginPath();
+                ctx.roundRect(barX + 2, barY + 2, (barWidth - 4) * currentBuilding.buildProgress, barHeight - 4, 3);
+                ctx.fill();
+                
+                // Процент
+                const percent = Math.floor(currentBuilding.buildProgress * 100);
+                ctx.fillStyle = '#FFF';
+                ctx.font = 'bold 12px sans-serif';
+                ctx.fillText(`${percent}%`, canvas.width / 2, barY + 15);
+            }
+        }
+
+        // Отрисовка меню строительства
+        function drawBuildMenu() {
+            // Затемнение фона
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Заголовок
+            ctx.fillStyle = '#FFF';
+            ctx.font = 'bold 28px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('🔨 Строительство', canvas.width / 2, 80);
+            ctx.font = '16px sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
+            ctx.fillText('Нажми 1, 2 или 3 для постройки | ESC — закрыть', canvas.width / 2, 110);
+
+            // Карточки построек
+            const cardWidth = 180;
+            const cardHeight = 175;
+            const startX = canvas.width / 2 - (cardWidth * 3 + 40) / 2;
+            const cardY = 150;
+
+            buildRecipes.forEach((recipe, index) => {
+                const cardX = startX + index * (cardWidth + 20);
+                const available = canBuild(recipe);
+
+                // Фон карточки
+                ctx.fillStyle = available ? 'rgba(80, 180, 80, 0.9)' : 'rgba(100, 100, 100, 0.9)';
+                ctx.beginPath();
+                ctx.roundRect(cardX, cardY, cardWidth, cardHeight, 12);
+                ctx.fill();
+
+                // Обводка
+                ctx.strokeStyle = available ? '#4CAF50' : '#666';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                // Номер
+                ctx.fillStyle = '#FFF';
+                ctx.font = 'bold 24px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(`${index + 1}`, cardX + cardWidth / 2, cardY + 30);
+
+                // Эмодзи
+                ctx.font = '50px serif';
+                ctx.fillText(recipe.emoji, cardX + cardWidth / 2, cardY + 85);
+
+                // Название
+                ctx.fillStyle = '#FFF';
+                ctx.font = 'bold 16px sans-serif';
+                ctx.fillText(recipe.name, cardX + cardWidth / 2, cardY + 115);
+
+                // Стоимость
+                ctx.font = '14px sans-serif';
+                let costText = '';
+                for (const [res, amt] of Object.entries(recipe.cost)) {
+                    const emoji = res === 'wood' ? '🪵' : res === 'stone' ? '🪨' : res === 'fiber' ? '🌿' : '🥥';
+                    costText += `${emoji}${amt} `;
+                }
+                ctx.fillText(costText, cardX + cardWidth / 2, cardY + 138);
+                
+                // Время строительства
+                ctx.fillStyle = 'rgba(255,255,255,0.8)';
+                ctx.font = '12px sans-serif';
+                ctx.fillText(`⏱️ ${recipe.buildTime} сек`, cardX + cardWidth / 2, cardY + 155);
+            });
+        }
+
+        function drawObject(obj, isHighlighted = false) {
+            const cx = obj.x + obj.width / 2;
+            const cy = obj.y + obj.height;
+
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'bottom';
+
+            // Цветной фон в зависимости от типа объекта
+            let bgColor;
+            switch(obj.type) {
+                case 'palm':
+                case 'tree':
+                    bgColor = '#8B5A2B'; // Коричневый для деревьев
+                    break;
+                case 'rock':
+                    bgColor = '#696969'; // Серый для камней
+                    break;
+                case 'bush':
+                    bgColor = '#228B22'; // Зелёный для кустов
+                    break;
+                case 'flower':
+                    bgColor = '#FFB6C1'; // Розовый для цветов
+                    break;
+                default:
+                    bgColor = '#DEB887'; // Бежевый для построек
+            }
+            
+            // Подсветка если рядом (для взаимодействия)
+            if (isHighlighted) {
+                ctx.fillStyle = 'rgba(255, 255, 100, 0.7)';
+                ctx.beginPath();
+                ctx.ellipse(cx, cy - 5, obj.width/2 + 18, obj.height/2 + 10, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Яркая обводка
+                ctx.strokeStyle = '#FFD700';
+                ctx.lineWidth = 4;
+                ctx.stroke();
+            }
+
+            // Яркий цветной круг-основа под объектом
+            ctx.fillStyle = bgColor;
+            ctx.beginPath();
+            ctx.ellipse(cx, cy - obj.height/3, obj.width/2 + 8, obj.height/2 + 5, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Светлая обводка для контраста
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            // Тень под объектом
+            ctx.fillStyle = 'rgba(0,0,0,0.4)';
+            ctx.beginPath();
+            ctx.ellipse(cx, cy + 2, obj.width/2.5, 12, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Сам объект (эмодзи)
+            ctx.font = `${obj.height + 10}px serif`;
+            ctx.fillText(obj.emoji, cx, cy + 6);
+
+            // Прогресс-бар для строящихся объектов
+            if (obj.isBuilding && obj.buildProgress !== undefined && obj.buildProgress < 1) {
+                const barWidth = obj.width + 20;
+                const barHeight = 8;
+                const barX = cx - barWidth / 2;
+                const barY = obj.y - 20;
+                
+                // Фон прогресс-бара
+                ctx.fillStyle = 'rgba(0,0,0,0.7)';
+                ctx.beginPath();
+                ctx.roundRect(barX, barY, barWidth, barHeight, 4);
+                ctx.fill();
+                
+                // Заполнение
+                ctx.fillStyle = '#4CAF50';
+                ctx.beginPath();
+                ctx.roundRect(barX + 2, barY + 2, (barWidth - 4) * obj.buildProgress, barHeight - 4, 2);
+                ctx.fill();
+                
+                // Текст
+                ctx.fillStyle = '#FFF';
+                ctx.font = 'bold 12px sans-serif';
+                ctx.fillText('Строится...', cx, barY - 5);
+            }
+        }
+
+        function drawPlayer() {
+            const cx = player.x + player.width / 2;
+            const cy = player.y + player.height;
+
+            // Тень под игроком
+            ctx.fillStyle = 'rgba(0,0,0,0.4)';
+            ctx.beginPath();
+            ctx.ellipse(cx, cy, 16, 6, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // === РИСУЕМ ПЕРСОНАЖА ===
+            // Цвета
+            const skinColor = '#FFD5B8';
+            const hairColor = '#5D4037';
+            const shirtColor = '#E53935';  // Яркий красный
+            const pantsColor = '#1565C0';  // Синий
+            const outlineColor = '#2D2D2D';
+            const outlineWidth = 2;
+
+            // Ноги (два прямоугольника)
+            ctx.fillStyle = pantsColor;
+            ctx.strokeStyle = outlineColor;
+            ctx.lineWidth = outlineWidth;
+            
+            // Левая нога
+            ctx.beginPath();
+            ctx.roundRect(cx - 10, cy - 18, 8, 16, 2);
+            ctx.fill();
+            ctx.stroke();
+            
+            // Правая нога
+            ctx.beginPath();
+            ctx.roundRect(cx + 2, cy - 18, 8, 16, 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Тело (прямоугольник с закруглением)
+            ctx.fillStyle = shirtColor;
+            ctx.beginPath();
+            ctx.roundRect(cx - 12, cy - 38, 24, 22, 4);
+            ctx.fill();
+            ctx.stroke();
+
+            // Руки
+            ctx.fillStyle = skinColor;
+            // Левая рука
+            ctx.beginPath();
+            ctx.roundRect(cx - 18, cy - 35, 7, 16, 3);
+            ctx.fill();
+            ctx.stroke();
+            
+            // Правая рука
+            ctx.beginPath();
+            ctx.roundRect(cx + 11, cy - 35, 7, 16, 3);
+            ctx.fill();
+            ctx.stroke();
+
+            // Голова (круг)
+            ctx.fillStyle = skinColor;
+            ctx.beginPath();
+            ctx.arc(cx, cy - 48, 14, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Волосы (полукруг сверху)
+            ctx.fillStyle = hairColor;
+            ctx.beginPath();
+            ctx.arc(cx, cy - 50, 12, Math.PI, 0);
+            ctx.fill();
+
+            // Глаза
+            ctx.fillStyle = '#2D2D2D';
+            ctx.beginPath();
+            ctx.arc(cx - 5, cy - 50, 2, 0, Math.PI * 2);
+            ctx.arc(cx + 5, cy - 50, 2, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Румянец (щёчки)
+            ctx.fillStyle = 'rgba(255, 150, 150, 0.5)';
+            ctx.beginPath();
+            ctx.ellipse(cx - 9, cy - 46, 3, 2, 0, 0, Math.PI * 2);
+            ctx.ellipse(cx + 9, cy - 46, 3, 2, 0, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // === ИГРОВОЙ ЦИКЛ ===
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Стартуем!
+        gameLoop();
+    </script>
+</body>
+</html>
